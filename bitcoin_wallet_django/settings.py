@@ -26,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'sisjv)4h-7-vw^oqtxwfp&%8p(!#e&9%8q4=pc#nbl*h0ai13h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get('DEBUG', default=1))
+DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost']
+ALLOWED_HOSTS = ['127.0.0.1','localhost','elmtalabtestsakku2','elmtalabtestsakku3','elmtalabtestsakku4']
 
 
 # Application definition

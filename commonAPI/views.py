@@ -1,3 +1,4 @@
+import coinaddr
 from django.shortcuts import render
 from django.http import JsonResponse
 import requests
@@ -26,15 +27,46 @@ Etherscan_API = "HHSFMGXC1EFW7B3XJ4DX32R77XJS7K3JD1"
 
 # Create your views here.
 def user_balance(request, public_key):
-    url = "https://blockchain.info/rawaddr/" + public_key
+    try:
+        url = "https://blockchain.info/rawaddr/" + public_key
+
+        payload = {}
+        headers = {}
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+        resp = response.json()
+
+        return JsonResponse(resp, safe=False)
+    except:
+        url = "https://blockchain.info/rawaddr/" + public_key
+
+        payload = {}
+        headers = {}
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+
+        return JsonResponse({"Error":response.text}, safe=False)
+
+def BTC_balance2(request,public_key):
+    url = "https://sochain.com/api/v2/address/BTC/" + public_key
 
     payload = {}
     headers = {}
 
-    response = requests.request("GET", url, headers=headers, data=payload)
-    resp = response.json()
+    response = requests.request("GET", url, headers=headers, data=payload).json()
+    return JsonResponse(response, safe=False)
 
-    return JsonResponse(resp, safe=False)
+def BTC_latest_block(request):
+
+    import requests
+
+    url = "https://blockchain.info/latestblock"
+
+    payload = {}
+    headers = {}
+
+    response = requests.request("GET", url, headers=headers, data=payload).json()
+    return JsonResponse(response, safe=False)
 
 
 def BCH_address_detail(request, public_key):
@@ -127,7 +159,7 @@ def ETH_address_detail_async(request, public_key):
     resp = {"balances": {"ETH native balance": response_ETH_balance["result"],
                          "Token balances": token_balance_list,
                          },
-            "NormalTransactions": response_ETH_transactions["result"],
+            "NormalTransactions": list(reversed(response_ETH_transactions["result"])),
             "TokenTransactions": response_ETH_token_transactions["result"]
             }
     return JsonResponse(resp, safe=False)
@@ -177,7 +209,7 @@ def give_address(request):
     return JsonResponse({"address": addr.address, "Message": "We successfully submitted user with user ID of:  " + str(
         addr.user_id) + "  To our database"})
 
-blocknative_API_key="b98bc2ee-1c5f-4dce-827b-cc1a34cd4443"
+blocknative_API_key="f4c3d35d-b1e4-49b7-8e9f-76f0e82f52a1"
 
 
 
@@ -264,3 +296,80 @@ def DASH_address_detail_async(request,public_key):
 
     response = requests.request("GET", url, headers=headers, data=payload).json()
     return JsonResponse(response, safe=False)
+
+
+def validate_BTC(request,public_key):
+    try:
+        validation=coinaddr.validate('btc', public_key)
+        if validation.valid:
+            return JsonResponse({"Address":public_key,"validation":validation.valid}, safe=False)
+        else:
+            return JsonResponse({"Address": public_key, "validation": validation.valid}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened" }, safe=False, status=500)
+
+
+def validate_ETH(request,public_key):
+    try:
+        validation = coinaddr.validate('eth', public_key)
+        if validation.valid:
+            return JsonResponse({"Address":public_key , "validation":validation.valid}, safe=False)
+        else:
+            return JsonResponse({"Address": public_key, "validation": validation.valid}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened" }, safe=False, status=500)
+
+def validate_LTC(request,public_key):
+    try:
+        validation = coinaddr.validate('ltc', public_key)
+        if validation.valid:
+            return JsonResponse({"Address":public_key , "validation":validation.valid}, safe=False)
+        else:
+            return JsonResponse({"Address": public_key, "validation": validation.valid}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened" }, safe=False, status=500)
+
+def validate_DOGE(request,public_key):
+    try:
+        validation = coinaddr.validate('doge', public_key)
+        if validation.valid:
+            return JsonResponse({"Address":public_key , "validation":validation.valid}, safe=False)
+        else:
+            return JsonResponse({"Address": public_key, "validation": validation.valid}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened" }, safe=False, status=500)
+
+def validate_XRP(request,public_key):
+    try:
+        validation = coinaddr.validate('xrp', public_key)
+        if validation.valid:
+            return JsonResponse({"Address":public_key , "validation":validation.valid}, safe=False)
+        else:
+            return JsonResponse({"Address": public_key, "validation": validation.valid}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened" }, safe=False, status=500)
+
+def validate_DASH(request,public_key):
+    try:
+        validation = coinaddr.validate('dash', public_key)
+        if validation.valid:
+            return JsonResponse({"Address":public_key , "validation":validation.valid}, safe=False)
+        else:
+            return JsonResponse({"Address": public_key, "validation": validation.valid}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened" }, safe=False, status=500)
+
+def validate_XLM(request,public_key):
+    try:
+        url = "https://horizon.stellar.org/accounts/"+ public_key
+
+        payload = {}
+        headers = {}
+        response = requests.request("GET", url, headers=headers, data=payload)
+        if response.status_code == 200:
+            return JsonResponse({"Address": public_key, "validation": True}, safe=False)
+        else:
+            response = response.json()
+            return JsonResponse({"Address": public_key, "validation": False ,"response":response}, safe=False, status=417)
+    except:
+        return JsonResponse({"Error": "An unknown error happened"}, safe=False, status=500)
